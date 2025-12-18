@@ -50,7 +50,7 @@ function createInnerHTML() {
 
 function removeEmployee(node) {
     console.log("Delete block");
-    let empId = parseInt(node.getAttribute("data-id"));
+    let empId = node.getAttribute("data-id");
 
     // Retrieve current list
     let employeeList = JSON.parse(localStorage.getItem("EmployeePayrollList")) || [];
@@ -61,7 +61,7 @@ function removeEmployee(node) {
     if (!employeeToDelete) return;
 
     // Find index using map + indexOf
-    let index = employeeList.findIndex(emp => emp._id === empId);
+    let index = employeeList.map(emp => emp._id).indexOf(empId);
 
     // Remove employee using splice
     employeeList.splice(index, 1);
@@ -71,19 +71,4 @@ function removeEmployee(node) {
 
     // Refresh table
     createInnerHTML();
-}
-
-
-function editEmployee(node) {
-    let empId = node.getAttribute("data-id");
-
-    let employeeList = JSON.parse(localStorage.getItem("EmployeePayrollList")) || [];
-
-    let employeeToEdit = employeeList.find(emp => emp._id == empId);
-
-    // Store employee data temporarily for editing
-    localStorage.setItem("editEmployee", JSON.stringify(employeeToEdit));
-
-    // Redirect to Add Employee Page
-    window.location.href = "add_employee.html";
 }

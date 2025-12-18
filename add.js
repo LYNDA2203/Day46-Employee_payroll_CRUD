@@ -1,45 +1,3 @@
-let isUpdate = false;
-let employeeToEdit = {};
-
-window.addEventListener("DOMContentLoaded", () => {
-    employeeToEdit = JSON.parse(localStorage.getItem("editEmployee"));
-
-    if (employeeToEdit) {
-        isUpdate = true;
-        setForm(employeeToEdit);   // fill form with data
-    }
-});
-
-function updateDays() {
-    let daySelect = document.getElementById("day");
-    let month = parseInt(document.getElementById("month").value);  // 0–11
-    let year = parseInt(document.getElementById("year").value);
-
-    if (!year || month === "") return;
-
-    let selectedDay = parseInt(daySelect.value);
-
-    let daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    daySelect.innerHTML = "";
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        let option = document.createElement("option");
-        option.value = d;
-        option.textContent = d;
-
-        if (d === selectedDay) option.selected = true;
-
-        daySelect.appendChild(option);
-    }
-}
-document.getElementById("month").addEventListener("change", updateDays);
-document.getElementById("year").addEventListener("change", updateDays);
-
-// Initialize Day dropdown on load
-updateDays();
-
-
 class EmployeePayroll {
 
     constructor() {
@@ -118,6 +76,7 @@ window.addEventListener("DOMContentLoaded", () => {
 function createEmployeeObject() {
 
     let emp = new EmployeePayroll();
+    emp._id = new Date().getTime();  // unique ID
     emp.name = document.getElementById("name").value;
     emp.profilePic = document.querySelector("input[name='profile']:checked")?.value || "";
     emp.gender = document.querySelector("input[name='gender']:checked")?.value || "";
@@ -185,92 +144,22 @@ function saveToLocalStorage(empObj) {
     localStorage.setItem("EmployeePayrollList", JSON.stringify(list));
 }
 
-function setForm(emp) {
-    document.getElementById("name").value = emp._name;
-    document.getElementById("salary").value = emp._salary;
-    document.getElementById("salary-output").textContent = emp._salary;
-
-    document.getElementById("notes").value = emp._notes;
-
-    // gender
-    document.querySelector(`input[name="gender"][value="${emp._gender}"]`).checked = true;
-
-    // profile pic
-    document.querySelector(`input[name="profile"][value="${emp._profilePic}"]`).checked = true;
-
-    // departments
-    document.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
-
-    document.querySelectorAll("input[type='checkbox']").forEach(chk => {
-        chk.checked = emp._department.includes(chk.value);
-    });
-
-    // date
-    let date = new Date(emp._startDate);
-    document.getElementById("day").value = date.getDate();
-    document.getElementById("month").value = date.getMonth();
-    document.getElementById("year").value = date.getFullYear();
-}
-
-
 document.getElementById("resetBtn").addEventListener("click", () => {
     nameError.innerText = "";
     dateError.innerText = "";
 });
 
 
-document.getElementById("payrollForm").addEventListener("submit", function(e) {
+document.getElementById("payrollForm").addEventListener("submit", e => {
     e.preventDefault();
 
     if (!validateStartDate()) return;
 
     try {
-        let emp = new EmployeePayroll();
-
-        emp.name = document.getElementById("name").value;
-        emp.profilePic = document.querySelector("input[name='profile']:checked")?.value || "";
-        emp.gender = document.querySelector("input[name='gender']:checked")?.value || "";
-
-        let deptValues = [];
-        document.querySelectorAll("input[type='checkbox']:checked").forEach(cb => {
-            deptValues.push(cb.value);
-        });
-        emp.department = deptValues;
-
-        emp.salary = document.getElementById("salary").value;
-        emp.notes = document.getElementById("notes").value;
-
-        let day = document.getElementById("day").value;
-        let month = document.getElementById("month").value;
-        let year = document.getElementById("year").value;
-
-        emp.startDate = new Date(year, month, day);
-
-        let employeeList = JSON.parse(localStorage.getItem("EmployeePayrollList")) || [];
-
-        if (isUpdate) {
-            emp._id = employeeToEdit._id;
-
-            let index = employeeList.map(e => e._id).indexOf(emp._id);
-            employeeList.splice(index, 1, emp);
-        } else {
-            emp._id = new Date().getTime();
-            employeeList.push(emp);
-        }
-
-        localStorage.setItem("EmployeePayrollList", JSON.stringify(employeeList));
-
-        // Clear edit data
-        localStorage.removeItem("editEmployee");
-
-        // Redirect to Home Page
-        window.location.href = "index.html";
-
+        const emp = createEmployeeObject();
+        saveToLocalStorage(emp);
+        alert("Employee Added!");
     } catch (err) {
         alert(err);
     }
-});
-
-document.getElementById("cancelBtn").addEventListener("click", () => {
-    window.location.href = "index.html"; // or home.html based on your file name
 });
