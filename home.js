@@ -50,7 +50,7 @@ function createInnerHTML() {
 
 function removeEmployee(node) {
     console.log("Delete block");
-    let empId = node.getAttribute("data-id");
+    let empId = parseInt(node.getAttribute("data-id"));
 
     // Retrieve current list
     let employeeList = JSON.parse(localStorage.getItem("EmployeePayrollList")) || [];
@@ -61,7 +61,7 @@ function removeEmployee(node) {
     if (!employeeToDelete) return;
 
     // Find index using map + indexOf
-    let index = employeeList.map(emp => emp._id).indexOf(empId);
+    let index = employeeList.findIndex(emp => emp._id === empId);
 
     // Remove employee using splice
     employeeList.splice(index, 1);
