@@ -72,3 +72,18 @@ function removeEmployee(node) {
     // Refresh table
     createInnerHTML();
 }
+
+
+function editEmployee(node) {
+    let empId = node.getAttribute("data-id");
+
+    let employeeList = JSON.parse(localStorage.getItem("EmployeePayrollList")) || [];
+
+    let employeeToEdit = employeeList.find(emp => emp._id == empId);
+
+    // Store employee data temporarily for editing
+    localStorage.setItem("editEmployee", JSON.stringify(employeeToEdit));
+
+    // Redirect to Add Employee Page
+    window.location.href = "add_employee.html";
+}
