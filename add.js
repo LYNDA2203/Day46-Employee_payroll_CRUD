@@ -10,6 +10,36 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+function updateDays() {
+    let daySelect = document.getElementById("day");
+    let month = parseInt(document.getElementById("month").value);  // 0–11
+    let year = parseInt(document.getElementById("year").value);
+
+    if (!year || month === "") return;
+
+    let selectedDay = parseInt(daySelect.value);
+
+    let daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    daySelect.innerHTML = "";
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        let option = document.createElement("option");
+        option.value = d;
+        option.textContent = d;
+
+        if (d === selectedDay) option.selected = true;
+
+        daySelect.appendChild(option);
+    }
+}
+document.getElementById("month").addEventListener("change", updateDays);
+document.getElementById("year").addEventListener("change", updateDays);
+
+// Initialize Day dropdown on load
+updateDays();
+
+
 class EmployeePayroll {
 
     constructor() {
@@ -169,6 +199,8 @@ function setForm(emp) {
     document.querySelector(`input[name="profile"][value="${emp._profilePic}"]`).checked = true;
 
     // departments
+    document.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+
     document.querySelectorAll("input[type='checkbox']").forEach(chk => {
         chk.checked = emp._department.includes(chk.value);
     });
@@ -187,38 +219,51 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 });
 
 
-document.getElementById("payrollForm").addEventListener("submit", e => {
+document.getElementById("payrollForm").addEventListener("submit", function(e) {
     e.preventDefault();
 
     if (!validateStartDate()) return;
 
     try {
-        let emp = createEmployeeObject();
+        let emp = new EmployeePayroll();
+
+        emp.name = document.getElementById("name").value;
+        emp.profilePic = document.querySelector("input[name='profile']:checked")?.value || "";
+        emp.gender = document.querySelector("input[name='gender']:checked")?.value || "";
+
+        let deptValues = [];
+        document.querySelectorAll("input[type='checkbox']:checked").forEach(cb => {
+            deptValues.push(cb.value);
+        });
+        emp.department = deptValues;
+
+        emp.salary = document.getElementById("salary").value;
+        emp.notes = document.getElementById("notes").value;
+
+        let day = document.getElementById("day").value;
+        let month = document.getElementById("month").value;
+        let year = document.getElementById("year").value;
+
+        emp.startDate = new Date(year, month, day);
+
         let employeeList = JSON.parse(localStorage.getItem("EmployeePayrollList")) || [];
 
         if (isUpdate) {
-            // Keep the same ID as old employee
             emp._id = employeeToEdit._id;
 
-            // Find index of the employee being edited
             let index = employeeList.map(e => e._id).indexOf(emp._id);
-
-            // Replace the old record
             employeeList.splice(index, 1, emp);
-
         } else {
-            // Create new ID for new employee
             emp._id = new Date().getTime();
             employeeList.push(emp);
         }
 
-        // Save updated list
         localStorage.setItem("EmployeePayrollList", JSON.stringify(employeeList));
 
-        // Remove edit mode data
+        // Clear edit data
         localStorage.removeItem("editEmployee");
 
-        // Redirect to home page
+        // Redirect to Home Page
         window.location.href = "index.html";
 
     } catch (err) {
@@ -226,3 +271,6 @@ document.getElementById("payrollForm").addEventListener("submit", e => {
     }
 });
 
+document.getElementById("cancelBtn").addEventListener("click", () => {
+    window.location.href = "index.html"; // or home.html based on your file name
+});
